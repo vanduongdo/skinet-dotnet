@@ -1,5 +1,6 @@
 using Core.Entities;
 using Core.Interfaces;
+using Core.Specifications;
 using Infrastructure.Data;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -10,19 +11,22 @@ namespace API.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class ProductsController(IProductRepository repository) : ControllerBase
+public class ProductsController(IGenericRepository<Product> repo) : ControllerBase
 {
     [HttpGet]
     public async Task<ActionResult<Product>> GetProducts(string? brand, string? type, string? sort)
     {
-        var products = await repository.GetProductsAsync(brand, type, sort);
+        var spec = new ProductSpecification(brand, type, sort);
+
+        var products = await repo.ListAsync(spec);
+
         return Ok(products);
     }
 
     [HttpGet("{id:int}")]
     public async Task<ActionResult<Product>> GetProduct(int id)
     {
-        var product = await repository.GetProductByIdAsync(id);
+        var product = await repo.GetByIdAsync(id);
         if (product == null) return NotFound();
         return Ok(product);
     }
@@ -30,9 +34,9 @@ public class ProductsController(IProductRepository repository) : ControllerBase
     [HttpPost]
     public async Task<ActionResult<Product>> CreateProduct([FromBody] Product product)
     {
-        repository.AddProduct(product);
+        repo.Add(product);
 
-        if (await repository.SaveChangesAsync())
+        if (await repo.SaveAllAsync())
         {
             return CreatedAtAction(nameof(GetProduct), new { id = product.Id }, product); // it give us the created product and the route in the header
         }
@@ -45,9 +49,9 @@ public class ProductsController(IProductRepository repository) : ControllerBase
     {
         if (ProductExists(id)) return BadRequest("Product ID mismatch");
 
-        repository.UpdateProduct(product);
+        repo.Update(product);
 
-        if (await repository.SaveChangesAsync())
+        if (await repo.SaveAllAsync())
         {
             return NoContent();
         }
@@ -58,29 +62,29 @@ public class ProductsController(IProductRepository repository) : ControllerBase
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> DeleteProduct(int id)
     {
-        var product = await repository.GetProductByIdAsync(id);
+        var product = await repo.GetByIdAsync(id);
         if (product == null) return NotFound();
 
-        repository.DeleteProduct(product);
-        if (await repository.SaveChangesAsync()) return Ok();
+        repo.Remove(product);
+        if (await repo.SaveAllAsync()) return Ok();
 
         return BadRequest("Product could not be deleted");
     }
 
     private bool ProductExists(int id)
     {
-        return repository.ProductExists(id);
+        return repo.Exists(id);
     }
 
     [HttpGet("types")]
-    public async Task<ActionResult<IReadOnlyList<string>>> GetProductTypes()
+    public Task<ActionResult<IReadOnlyList<string>>> GetProductTypes()
     {
-        return Ok(await repository.GetTypesAsync());
+        throw new NotImplementedException();
     }
 
     [HttpGet("brands")]
-    public async Task<ActionResult<IReadOnlyList<string>>> GetProductBrands()
+    public Task<ActionResult<IReadOnlyList<string>>> GetProductBrands()
     {
-        return Ok(await repository.GetBrandsAsync());
+        throw new NotImplementedException();
     }
 }

@@ -11,6 +11,7 @@ builder.Services.AddDbContext<StoreContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")
 ));
 builder.Services.AddScoped<IProductRepository, ProductRepository>(); // Scoped = one instance per request, Transient = one instance per lifetime, effectively scoped to the method level and Singleton = one instance per application
+builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 
 
 var app = builder.Build();
