@@ -77,14 +77,18 @@ public class ProductsController(IGenericRepository<Product> repo) : ControllerBa
     }
 
     [HttpGet("types")]
-    public Task<ActionResult<IReadOnlyList<string>>> GetProductTypes()
+    public async Task<ActionResult<IReadOnlyList<string>>> GetProductTypes()
     {
-        throw new NotImplementedException();
+        var spec = new TypeListSpecification();
+
+        return Ok(await repo.ListAsync(spec));
     }
 
     [HttpGet("brands")]
-    public Task<ActionResult<IReadOnlyList<string>>> GetProductBrands()
+    public async Task<ActionResult<IReadOnlyList<string>>> GetProductBrands()
     {
-        throw new NotImplementedException();
+        var spec = new BrandListSpecification();
+
+        return Ok(await repo.ListAsync(spec));
     }
 }
