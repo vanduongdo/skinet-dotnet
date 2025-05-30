@@ -1,7 +1,9 @@
 using API.Middleware;
 using Core.Interfaces;
 using Infrastructure.Data;
+using Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
+using StackExchange.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,6 +16,14 @@ builder.Services.AddDbContext<StoreContext>(options =>
 builder.Services.AddScoped<IProductRepository, ProductRepository>(); // Scoped = one instance per request, Transient = one instance per lifetime, effectively scoped to the method level and Singleton = one instance per application
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 builder.Services.AddCors();
+builder.Services.AddSingleton<IConnectionMultiplexer>(config =>
+{
+    var connString = builder.Configuration.GetConnectionString("Redis")
+        ?? throw new Exception("Cannot get Redis connection string");
+    var configuration = ConfigurationOptions.Parse(connString, true);
+    return ConnectionMultiplexer.Connect(configuration);
+});
+builder.Services.AddSingleton<ICartService, CartService>(); // Singleton = one instance per application>
 
 var app = builder.Build();
 
