@@ -16,6 +16,7 @@ builder.Services.AddDbContext<StoreContext>(options =>
 ));
 builder.Services.AddScoped<IProductRepository, ProductRepository>(); // Scoped = one instance per request, Transient = one instance per lifetime, effectively scoped to the method level and Singleton = one instance per application
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddCors();
 builder.Services.AddSingleton<IConnectionMultiplexer>(config =>
 {
