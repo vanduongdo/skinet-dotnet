@@ -41,7 +41,7 @@ public class ProductsController(IUnitOfWork unit) : BaseApiController
     [HttpPut("{id:int}")]
     public async Task<ActionResult<Product>> UpdateProduct(int id, Product product)
     {
-        if (ProductExists(id)) return BadRequest("Product ID mismatch");
+        if (!ProductExists(id)) return BadRequest("Product ID mismatch");
 
         unit.Repository<Product>().Update(product);
 
