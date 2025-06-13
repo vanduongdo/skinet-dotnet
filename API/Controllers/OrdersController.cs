@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace API.Controllers;
 
 [Authorize]
-public class OrdersCotroller(ICartService cartService, IUnitOfWork unit) : BaseApiController
+public class OrdersController(ICartService cartService, IUnitOfWork unit) : BaseApiController
 {
     [HttpPost]
     public async Task<ActionResult<Order>> CreateOrder(CreateOrderDto orderDto)
@@ -48,7 +48,7 @@ public class OrdersCotroller(ICartService cartService, IUnitOfWork unit) : BaseA
             items.Add(orderItem);
         }
 
-        var deliveryMethod = await unit.Repository<DeliveryMethod>().GetByIdAsync(orderDto.DeliveryMethod);
+        var deliveryMethod = await unit.Repository<DeliveryMethod>().GetByIdAsync(orderDto.DeliveryMethodId);
 
         if (deliveryMethod == null) return BadRequest("No delivery method selected");
 
