@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using API.Extensions;
+using System.Security.Claims;
 
 namespace API.Controllers;
 
@@ -54,7 +55,14 @@ public class AccountController(SignInManager<AppUser> signInManager) : BaseApiCo
 
         if (user == null) return Unauthorized();
 
-        return Ok(new { user.FirstName, user.LastName, user.Email, Address = user.Address?.ToDto() });
+        return Ok(new
+        {
+            user.FirstName,
+            user.LastName,
+            user.Email,
+            Address = user.Address?.ToDto(),
+            Roles = User.FindFirstValue(ClaimTypes.Role)
+        });
     }
 
     [Authorize]
