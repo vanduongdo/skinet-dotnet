@@ -9,6 +9,7 @@ namespace API.Controllers;
 
 public class ProductsController(IUnitOfWork unit) : BaseApiController
 {
+    [Cache(600)]
     [HttpGet]
     public async Task<ActionResult<Product>> GetProducts(
         [FromQuery] ProductSpecParams specParams)
@@ -18,6 +19,7 @@ public class ProductsController(IUnitOfWork unit) : BaseApiController
         return await CreatePageResult(unit.Repository<Product>(), spec, specParams.PageIndex, specParams.PageSize);
     }
 
+    [Cache(600)]
     [HttpGet("{id:int}")]
     public async Task<ActionResult<Product>> GetProduct(int id)
     {
@@ -26,6 +28,7 @@ public class ProductsController(IUnitOfWork unit) : BaseApiController
         return Ok(product);
     }
 
+    [InvalidateCache("api/products|")]
     [Authorize(Roles = "Admin")]
     [HttpPost]
     public async Task<ActionResult<Product>> CreateProduct([FromBody] Product product)
@@ -40,6 +43,7 @@ public class ProductsController(IUnitOfWork unit) : BaseApiController
         return BadRequest("Product could not be created");
     }
 
+    [InvalidateCache("api/products|")]
     [Authorize(Roles = "Admin")]
     [HttpPut("{id:int}")]
     public async Task<ActionResult<Product>> UpdateProduct(int id, Product product)
@@ -56,6 +60,7 @@ public class ProductsController(IUnitOfWork unit) : BaseApiController
         return BadRequest("Product could not be updated");
     }
 
+    [InvalidateCache("api/products|")]
     [Authorize(Roles = "Admin")]
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> DeleteProduct(int id)
@@ -74,6 +79,7 @@ public class ProductsController(IUnitOfWork unit) : BaseApiController
         return unit.Repository<Product>().Exists(id);
     }
 
+    [Cache(10000)]
     [HttpGet("types")]
     public async Task<ActionResult<IReadOnlyList<string>>> GetProductTypes()
     {
@@ -82,6 +88,7 @@ public class ProductsController(IUnitOfWork unit) : BaseApiController
         return Ok(await unit.Repository<Product>().ListAsync(spec));
     }
 
+    [Cache(10000)]
     [HttpGet("brands")]
     public async Task<ActionResult<IReadOnlyList<string>>> GetProductBrands()
     {
